@@ -50,7 +50,7 @@ app.add_middleware(
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DTYPE  = torch.float16 if torch.cuda.is_available() else torch.float32
 GROQ_API_KEY        = os.environ.get("GROQ_API_KEY", "")
-SEVERITY_MODEL_PATH = r"C:\NeuroSpeak\Outputs\severity_classifier_hubert.pkl"
+SEVERITY_MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "Outputs", "severity_classifier_hubert.pkl")
 
 if not GROQ_API_KEY:
     print("[WARN] GROQ_API_KEY not set - LLM stages will echo ASR output.")

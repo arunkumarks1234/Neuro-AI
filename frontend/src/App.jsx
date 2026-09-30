@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const API = 'http://localhost:8000';
+const API = '';
 
 // ══════════════════════════════════════════════════
 // Global Styles
