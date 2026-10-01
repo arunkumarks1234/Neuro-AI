@@ -258,19 +258,34 @@ async def analyze_utterance(file: UploadFile = File(...), patient_id: int = Form
             raise HTTPException(status_code=422,
                                 detail="Recording too short (< 0.3 s). Please speak for at least 1 second.")
 
+        # Trim to max 15 seconds to avoid slow processing
+        max_samples = 16000 * 15
+        if len(y) > max_samples:
+            y = y[:max_samples]
+            dur = 15.0
+            print(f"[audio] trimmed to 15s")
+
+        import time
+
         # Severity (HuBERT + SVM)
+        t0 = time.time()
         embedding         = run_hubert(y)
         clin_vec, metrics = get_clinical_features(y)
         feat_1031         = np.concatenate([embedding, clin_vec]).reshape(1, -1)
         severity          = str(severity_clf.predict(feat_1031)[0])
+        print(f"[timing] HuBERT + SVM: {time.time()-t0:.2f}s")
 
         # ASR
+        t0 = time.time()
         raw = run_whisper(y)
         s1  = clean_text(raw)
         s2  = clean_text(phonetic_preprocess(raw))
+        print(f"[timing] Whisper ASR: {time.time()-t0:.2f}s  ->  '{s1}'")
 
         # LLM debate
+        t0 = time.time()
         s3, s4 = llm_debate(s2, dur)
+        print(f"[timing] LLM debate: {time.time()-t0:.2f}s  ->  '{s4}'")
 
         # Save to Database if patient_id is provided
         if patient_id is not None:
